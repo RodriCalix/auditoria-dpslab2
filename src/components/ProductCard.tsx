@@ -1,6 +1,6 @@
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Product } from '../types/Product'; // Ajusta la ruta si es necesario
+import { Product } from '../types/Product';
 
 export default function ProductCard({ item }: { item: Product }) {
   return (

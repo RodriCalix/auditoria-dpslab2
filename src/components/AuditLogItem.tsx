@@ -75,7 +75,7 @@ export default function AuditLogItem({ item }: { item: any }) {
               </View>
             )}
 
-            {/* Nuevo botón clickeable para ir al mapa */}
+            {}
             <TouchableOpacity style={styles.locationRow} onPress={goToMap}>
               <MaterialIcons name="map" size={18} color="#007AFF" />
               <View style={{ marginLeft: 8 }}>

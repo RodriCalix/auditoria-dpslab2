@@ -4,11 +4,13 @@ import { useCameraPermissions } from 'expo-camera';
 import * as Location from 'expo-location';
 import { useAudioRecorder, RecordingPresets, AudioModule } from 'expo-audio';
 import { MaterialIcons } from '@expo/vector-icons';
+
+import { useRouter, usePathname } from 'expo-router'; 
+
 import { CATALOG } from '../../data/products';
 import { Product } from '../../types/Product';
 import { useAppDispatch } from '../../context/redux/hooks';
 import { addAuditEntry } from '../../context/redux/auditSlice';
-import { useRouter } from 'expo-router';
 import CameraScanner from '../../components/CameraScanner';
 import AudioRecorder from '../../components/AudioRecorder';
 
@@ -20,13 +22,15 @@ export default function ScannerScreen() {
   const [showIncidenceForm, setShowIncidenceForm] = useState(false);
   const [observation, setObservation] = useState('');
   
-  // Controles manuales para la UI del micrófono
   const [isRecordingUI, setIsRecordingUI] = useState(false);
   const [hasAudio, setHasAudio] = useState(false);
   
   const dispatch = useAppDispatch();
   const router = useRouter();
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  
+  const pathname = usePathname();
+  const isFocused = pathname === '/scanner';
 
   if (!permission?.granted) {
     return (
@@ -61,6 +65,7 @@ export default function ScannerScreen() {
       await recorder.prepareToRecordAsync();
       recorder.record();
       setIsRecordingUI(true);
+      setHasAudio(false);
     } else {
       await recorder.stop();
       setIsRecordingUI(false);
@@ -84,23 +89,32 @@ export default function ScannerScreen() {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') throw new Error('GPS denegado');
       
-      const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      let location = await Location.getLastKnownPositionAsync({});
+      if (!location) {
+         location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Lowest });
+      }
       
       if (isRecordingUI) await recorder.stop();
       
       const finalAudioUrl = (type === 'INCIDENCE' && hasAudio) ? (recorder.uri || undefined) : undefined;
       const finalObs = (type === 'INCIDENCE' && observation.trim().length > 0) ? observation.trim() : undefined;
       
-      dispatch(addAuditEntry({
-        id: Date.now().toString(),
-        productId: scannedProduct.id,
-        productTitle: scannedProduct.title,
-        timestamp: new Date().toISOString(),
-        actionType: type,
-        observationText: finalObs,
-        audioNoteUrl: finalAudioUrl,
-        location: { latitude: location.coords.latitude, longitude: location.coords.longitude }
-      }));
+const randomAngle = Math.random() * 2 * Math.PI;
+const offset = 0.0003;
+
+dispatch(addAuditEntry({
+  id: Date.now().toString() + Math.random().toString(36).substring(2, 9), // ID 100% irrepetible
+  productId: scannedProduct.id,
+  productTitle: scannedProduct.title,
+  timestamp: new Date().toISOString(),
+  actionType: type,
+  observationText: finalObs,
+  audioNoteUrl: finalAudioUrl,
+  location: { 
+    latitude: location.coords.latitude + (Math.sin(randomAngle) * offset), 
+    longitude: location.coords.longitude + (Math.cos(randomAngle) * offset) 
+  }
+}));
 
       Alert.alert('Guardado', 'Auditoría registrada exitosamente.');
       setScannedProduct(null);
@@ -118,7 +132,9 @@ export default function ScannerScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraScanner isActive={!scannedProduct} onBarcodeScanned={handleBarcodeScanned} />
+      {isFocused && (
+        <CameraScanner isActive={!scannedProduct} onBarcodeScanned={handleBarcodeScanned} />
+      )}
       
       {scannedProduct && (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalOverlay}>
@@ -132,7 +148,7 @@ export default function ScannerScreen() {
               <View style={styles.actionRow}>
                 <TouchableOpacity style={[styles.actionBtn, styles.btnSuccess]} onPress={() => saveAudit('AUDIT_CHECK')} disabled={isProcessing}>
                   <MaterialIcons name="check-circle" size={24} color="#FFF" />
-                  <Text style={styles.btnText}>Stock Exacto</Text>
+                  <Text style={styles.btnText}>{isProcessing ? 'Guardando...' : 'Stock Exacto'}</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity style={[styles.actionBtn, styles.btnWarning]} onPress={() => setShowIncidenceForm(true)} disabled={isProcessing}>
@@ -150,12 +166,11 @@ export default function ScannerScreen() {
                   multiline
                 />
                 
-                <AudioRecorder isRecording={isRecordingUI} onToggle={toggleRecording} />
+                <AudioRecorder isRecording={isRecordingUI} hasAudio={hasAudio} onToggle={toggleRecording} />
                 
-                {/* Botón corregido sin flex: 1 */}
                 <TouchableOpacity style={[styles.submitBtn, styles.btnWarning]} onPress={() => saveAudit('INCIDENCE')} disabled={isProcessing}>
                   <MaterialIcons name="save" size={24} color="#FFF" />
-                  <Text style={styles.btnText}>Guardar Incidencia</Text>
+                  <Text style={styles.btnText}>{isProcessing ? 'Guardando...' : 'Guardar Incidencia'}</Text>
                 </TouchableOpacity>
               </View>
             )}

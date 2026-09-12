@@ -2,10 +2,10 @@ export interface AuditEntry {
   id: string;
   productId: string;
   productTitle: string;
-  timestamp: string; // ISO String
+  timestamp: string;
   actionType: 'AUDIT_CHECK' | 'INCIDENCE' | 'STOCK_RECEIPT';
   observationText?: string;
-  audioNoteUrl?: string; // URL local del audio grabado
+  audioNoteUrl?: string; 
   location: {
     latitude: number;
     longitude: number;

@@ -32,7 +32,7 @@ Debido a la profunda integración de módulos nativos de hardware (Cámara, Micr
 
 ### 2. Clonar el repositorio
 ```bash
-git clone <URL_DEL_REPOSITORIO>
+git clone <https://github.com/RodriCalix/auditoria-dpslab2.git>
 cd bodega-app
 ```
 
@@ -51,5 +51,5 @@ npx expo run:android
 ## 👨‍💻 Autores
 Proyecto académico desarrollado para la facultad de Ingeniería en Ciencias de la Computación de la Universidad Don Bosco (UDB).
 
-*   **Rodrigo Calixto**
-*   **Luis Cuadra**
+*   **Rodrigo Josué Calixto López CL230353**
+*   **Luis Felipe Cuadra Cruz CC230464**

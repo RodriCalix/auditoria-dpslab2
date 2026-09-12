@@ -12,7 +12,7 @@ export default function SearchBar({ value, onChangeText }: SearchBarProps) {
       <MaterialIcons name="search" size={24} color="#888" style={styles.searchIcon} />
       <TextInput
         style={styles.searchInput}
-        placeholder="Buscar por nombre o código EAN..."
+        placeholder="Buscar por nombre o código..."
         placeholderTextColor="#888"
         value={value}
         onChangeText={onChangeText}

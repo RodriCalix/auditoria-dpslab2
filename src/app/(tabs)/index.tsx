@@ -32,7 +32,7 @@ export default function CatalogScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Gestión de Bodega</Text>
-        <Text style={styles.headerSubtitle}>Total en sistema: {CATALOG.length} SKUs</Text>
+        <Text style={styles.headerSubtitle}>Total en sistema: {CATALOG.length} Productos</Text>
       </View>
 
       <SearchBar value={search} onChangeText={setSearch} />
